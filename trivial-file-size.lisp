@@ -2,6 +2,10 @@
 
 (in-package #:trivial-file-size)
 
+#+egcl
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (require :egcl-posix))
+
 ;;; "trivial-file-size" goes here. Hacks and glory await!
 
 (deftype file-size ()
@@ -35,6 +39,7 @@ Some platforms (e.g. ABCL) may return 0 when the file does not exist."
     (handler-case
         (progn
           #+sbcl (sb-posix:stat-size (sb-posix:stat path))
+          #+egcl (egcl-posix:stat-size (egcl-posix:stat namestring))
           #+cmucl (nth-value 8 (unix:unix-stat namestring))
           #+ccl (ccl:file-data-size path)
           #+clisp (os:file-stat-size (os:file-stat path))
@@ -67,7 +72,7 @@ Some platforms (e.g. ABCL) may return 0 when the file does not exist."
           (stat/ecl path)
           #+clasp (nth-value 0 (ext:stat namestring))
 
-          #-(or sbcl cmucl ccl clasp clisp allegro abcl gcl
+          #-(or egcl sbcl cmucl ccl clasp clisp allegro abcl gcl
                 lispworks
                 (and ecl unix))
           (file-size-from-stream file))
